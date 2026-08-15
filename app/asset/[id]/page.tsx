@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { BUSINESSES } from "@/lib/data";
 import { AssetListItem, FundingCategory } from "@/lib/types";
 
@@ -86,10 +87,21 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
   const title = item.kind === "direct" ? item.title : item.name;
   const description = item.kind === "direct" ? item.description : item.pitch;
   const tokenSymbol = item.kind === "business" ? item.tokenSymbol : item.id.slice(0, 5).toUpperCase();
+  const buttonLabel =
+    item.kind === "direct" ? "Record this on Brickken" : "Tokenize with Brickken";
+  const explainer =
+    item.kind === "direct"
+      ? "This creates a token that stands for who backed this category. It is a transparent record, not a claim of ownership."
+      : "This creates a token representing a real world asset, tracked and moved through Brickken's sandbox.";
 
   return (
     <div className="page">
-      <div className="label">Step three</div>
+      <Link href="/dog-economy" style={{ fontSize: 14, color: "#8a8270", textDecoration: "none" }}>
+        ← Back to the dog economy
+      </Link>
+      <div className="label" style={{ marginTop: 16 }}>
+        Step three
+      </div>
       <h1 style={{ marginBottom: 24 }}>{title}</h1>
 
       <div className="card">
@@ -118,9 +130,12 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
         />
 
         {step === "idle" && (
-          <button className="btn btn-brass" onClick={tokenize}>
-            Tokenize with Brickken
-          </button>
+          <>
+            <p style={{ fontSize: 13, color: "#8a8270", marginBottom: 12 }}>{explainer}</p>
+            <button className="btn btn-brass" onClick={tokenize}>
+              {buttonLabel}
+            </button>
+          </>
         )}
 
         {step !== "idle" && (

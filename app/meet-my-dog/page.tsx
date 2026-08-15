@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import DogProfileCard from "@/components/DogProfileCard";
 import { DogProfile } from "@/lib/types";
@@ -22,14 +22,33 @@ export default function MeetMyDog() {
   const [dogName, setDogName] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
   const [profile, setProfile] = useState<DogProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [audioLoading, setAudioLoading] = useState(false);
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem("dogen-profile");
+    if (stored) {
+      const parsed = JSON.parse(stored) as DogProfile;
+      setProfile(parsed);
+      setDogName(parsed.name);
+    }
+  }, []);
+
+  function startOver() {
+    window.localStorage.removeItem("dogen-profile");
+    window.localStorage.removeItem("dogen-categories");
+    setProfile(null);
+    setDogName("");
+    setPreviewUrl(null);
+  }
 
   async function handleFile(file: File) {
     setError(null);
     setPreviewUrl(URL.createObjectURL(file));
     setLoading(true);
+    setAnalyzing(true);
     try {
       const { base64, mimeType } = await fileToBase64(file);
       const res = await fetch("/api/analyze-dog", {
@@ -41,10 +60,12 @@ export default function MeetMyDog() {
       if (!res.ok) throw new Error(data.error ?? "Something went wrong reading the photo");
       setProfile(data);
       window.localStorage.setItem("dogen-profile", JSON.stringify(data));
+      window.localStorage.removeItem("dogen-categories");
     } catch (err: any) {
       setError(err.message ?? "Something went wrong");
     } finally {
       setLoading(false);
+      setAnalyzing(false);
     }
   }
 
@@ -112,7 +133,11 @@ export default function MeetMyDog() {
           />
         </label>
 
-        {loading && <p style={{ marginTop: 16, color: "#8a8270" }}>Reading the photo...</p>}
+        {analyzing && (
+          <p className="mono" style={{ marginTop: 16, color: "#8a8270", fontSize: 13 }}>
+            Analyzing with Google AI...
+          </p>
+        )}
         {error && <p style={{ marginTop: 16, color: "#a13f3f" }}>{error}</p>}
       </div>
 
@@ -122,11 +147,17 @@ export default function MeetMyDog() {
 
           <div style={{ marginTop: 16, display: "flex", gap: 12, flexWrap: "wrap" }}>
             <button className="audio-btn" onClick={hearDog} disabled={audioLoading}>
-              {audioLoading ? "Loading..." : `Hear ${profile.name}`}
+              {audioLoading ? "Loading..." : `Hear ${profile.name} speak`}
             </button>
             <Link href="/dog-economy" className="btn btn-brass">
               See the dog economy
             </Link>
+            <button
+              onClick={startOver}
+              style={{ background: "none", border: "none", color: "#8a8270", fontSize: 14, cursor: "pointer" }}
+            >
+              Start over with a different dog
+            </button>
           </div>
         </div>
       )}
