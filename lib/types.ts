@@ -19,7 +19,10 @@ export type Business = {
   id: string;
   kind: "business";
   name: string;
+  category: string;
   pitch: string;
+  purpose: string;
+  structure: string;
   targetUSD: number;
   tokenSymbol: string;
 };

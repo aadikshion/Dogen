@@ -25,7 +25,8 @@ async function brickkenFetch(path: string, options: RequestInit) {
   const body = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    throw new Error(body?.message ?? `Brickken request failed with ${res.status}`);
+    const reason = body?.message || body?.error || body?.detail || JSON.stringify(body);
+    throw new Error(`Brickken ${res.status}: ${reason}`);
   }
 
   return body;
@@ -37,7 +38,6 @@ export type PrepareResponse = {
   info?: Record<string, any>;
 };
 
-// Step one, prepare an unsigned transaction for the given method.
 export async function prepareTransaction(
   method: string,
   fields: Record<string, any>
@@ -54,7 +54,6 @@ export async function prepareTransaction(
   });
 }
 
-// Step two, sign every transaction Brickken handed back with the signer wallet.
 export async function signTransactions(
   transactions: Array<Record<string, any>>
 ): Promise<string[]> {
@@ -68,7 +67,6 @@ export async function signTransactions(
   return signed;
 }
 
-// Step three, send the signed payloads back to Brickken so it can broadcast them.
 export async function sendTransactions(txId: string, signedTransactions: string[]) {
   return brickkenFetch("/send-transactions", {
     method: "POST",
@@ -76,32 +74,15 @@ export async function sendTransactions(txId: string, signedTransactions: string[
   });
 }
 
-// Step four, poll until the transaction is mined. Do not resend on pending.
 export async function getTransactionStatus(txId: string) {
   return brickkenFetch(`/get-transaction-status?txId=${txId}`, {
     method: "GET",
   });
 }
 
-// Convenience wrapper that runs prepare, sign, and send in one call.
-// Status still has to be polled separately, since confirmation can take a moment.
 export async function prepareSignAndSend(method: string, fields: Record<string, any>) {
   const prepared = await prepareTransaction(method, fields);
   const signed = await signTransactions(prepared.transactions);
   const sendResult = await sendTransactions(prepared.txId, signed);
   return { txId: prepared.txId, info: prepared.info, sendResult };
-}
-
-export async function pollUntilConfirmed(
-  txId: string,
-  { intervalMs = 4000, maxAttempts = 30 } = {}
-) {
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const status = await getTransactionStatus(txId);
-    if (status.status && status.status !== "pending") {
-      return status;
-    }
-    await new Promise((resolve) => setTimeout(resolve, intervalMs));
-  }
-  throw new Error("Timed out waiting for confirmation, check get-transaction-status manually");
 }
