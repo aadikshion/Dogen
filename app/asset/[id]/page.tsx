@@ -145,10 +145,21 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
             <StatusLine label="Confirmed on chain" done={step === "confirmed"} active={false} />
 
             {step === "confirmed" && (
-              <p className="mono" style={{ marginTop: 16, fontSize: 13 }}>
-                Asset tokenized. Token: {tokenSymbol}. Chain: Sepolia.
-                {txHash ? ` Transaction: ${txHash}` : ""}
-              </p>
+              <>
+                <p className="mono" style={{ marginTop: 16, fontSize: 13 }}>
+                  Asset tokenized. Token: {tokenSymbol}. Chain: Sepolia.
+                  {txHash ? ` Transaction: ${txHash}` : ""}
+                </p>
+                <div style={{ marginTop: 24, borderTop: "1px solid var(--line)", paddingTop: 20 }}>
+                  <div className="label">What happens next</div>
+                  <ul style={{ margin: 0, paddingLeft: 20, fontSize: 14, color: "#5c574a", lineHeight: 1.9 }}>
+                    <li>Backers who want to hold this token get whitelisted</li>
+                    <li>A funding round opens with a start and end date</li>
+                    <li>Investors put money in and claim their token</li>
+                    <li>The round closes and funds move to what was raised for</li>
+                  </ul>
+                </div>
+              </>
             )}
 
             {error && <p style={{ marginTop: 16, color: "#a13f3f" }}>{error}</p>}

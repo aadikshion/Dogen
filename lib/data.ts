@@ -1,7 +1,5 @@
 import { Business, DogProfile, FundingCategory } from "./types";
 
-// Rough real world cost multipliers. Small numbers on purpose, this is
-// sandbox testnet money, not real currency.
 const SIZE_MULTIPLIER: Record<DogProfile["size"], number> = {
   Small: 1,
   Medium: 1.5,
@@ -54,15 +52,15 @@ export const BUSINESSES: Business[] = [
   {
     id: "pawwash",
     kind: "business",
-    name: "PawWash Mobile Grooming",
-    pitch: "A van that brings the grooming table to the driveway.",
+    name: "Ronke's Mobile Grooming",
+    pitch: "A van that brings the grooming table to your driveway.",
     targetUSD: 20000,
     tokenSymbol: "PWASH",
   },
   {
     id: "happytails",
     kind: "business",
-    name: "Happy Tails Daycare",
+    name: "Ikoyi Paws Daycare",
     pitch: "Adding a second play yard to cut the waitlist.",
     targetUSD: 35000,
     tokenSymbol: "HTAIL",
@@ -70,8 +68,8 @@ export const BUSINESSES: Business[] = [
   {
     id: "pawvan",
     kind: "business",
-    name: "PawVan 03",
-    pitch: "A second mobile grooming unit for the east side of town.",
+    name: "East Lagos Grooming Co.",
+    pitch: "A second mobile grooming van for dogs on the east side of town.",
     targetUSD: 25000,
     tokenSymbol: "PWVAN",
   },

@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const STEPS = [
   { n: "01", title: "Meet your dog", body: "Upload a photo, AI builds a care profile." },
@@ -8,6 +11,15 @@ const STEPS = [
 ];
 
 export default function Home() {
+  const [active, setActive] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setActive((prev) => (prev + 1) % STEPS.length);
+    }, 2200);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <>
       <div className="hero">
@@ -29,7 +41,7 @@ export default function Home() {
       <div className="page">
         <div className="grid">
           {STEPS.map((step, i) => (
-            <div key={step.n} className="card step-card" style={{ animationDelay: `${i * 0.12}s` }}>
+            <div key={step.n} className={`card step-card ${active === i ? "step-card-active" : ""}`}>
               <div className="mono" style={{ color: "var(--brass-dim)", fontSize: 13, marginBottom: 6 }}>
                 {step.n}
               </div>
