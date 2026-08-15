@@ -1,0 +1,165 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { BUSINESSES } from "@/lib/data";
+import { AssetListItem, FundingCategory } from "@/lib/types";
+
+type Step = "idle" | "preparing" | "sent" | "confirmed" | "failed";
+
+export default function AssetDetail({ params }: { params: { id: string } }) {
+  const searchParams = useSearchParams();
+  const kind = searchParams.get("kind") === "business" ? "business" : "direct";
+
+  const [item, setItem] = useState<AssetListItem | null>(null);
+  const [email, setEmail] = useState("owner@example.com");
+  const [step, setStep] = useState<Step>("idle");
+  const [txHash, setTxHash] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (kind === "business") {
+      const found = BUSINESSES.find((b) => b.id === params.id) ?? null;
+      setItem(found);
+    } else {
+      const stored = window.localStorage.getItem("dogen-categories");
+      if (stored) {
+        const categories = JSON.parse(stored) as FundingCategory[];
+        setItem(categories.find((c) => c.id === params.id) ?? null);
+      }
+    }
+  }, [kind, params.id]);
+
+  async function tokenize() {
+    if (!item) return;
+    setError(null);
+    setStep("preparing");
+
+    const assetName = item.kind === "direct" ? item.title : item.name;
+    const tokenSymbol =
+      item.kind === "business" ? item.tokenSymbol : item.id.slice(0, 5).toUpperCase();
+
+    try {
+      const res = await fetch("/api/brickken/prepare", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          assetName,
+          tokenSymbol,
+          targetUSD: item.targetUSD,
+          tokenizerEmail: email,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Tokenization failed");
+
+      setStep("sent");
+      await pollStatus(data.txId);
+    } catch (err: any) {
+      setError(err.message ?? "Something went wrong");
+      setStep("failed");
+    }
+  }
+
+  async function pollStatus(txId: string) {
+    for (let attempt = 0; attempt < 20; attempt++) {
+      const res = await fetch(`/api/brickken/status?txId=${txId}`);
+      const data = await res.json();
+      if (data.status && data.status !== "pending") {
+        setStep("confirmed");
+        setTxHash(data.txHash ?? null);
+        return;
+      }
+      await new Promise((r) => setTimeout(r, 4000));
+    }
+    setError("Still pending after a while, check the status manually with this txId: " + txId);
+  }
+
+  if (!item) {
+    return (
+      <div className="page">
+        <p>Could not find that item. Go back and pick a dog or business first.</p>
+      </div>
+    );
+  }
+
+  const title = item.kind === "direct" ? item.title : item.name;
+  const description = item.kind === "direct" ? item.description : item.pitch;
+  const tokenSymbol = item.kind === "business" ? item.tokenSymbol : item.id.slice(0, 5).toUpperCase();
+
+  return (
+    <div className="page">
+      <div className="label">Step three</div>
+      <h1 style={{ marginBottom: 24 }}>{title}</h1>
+
+      <div className="card">
+        <p style={{ marginBottom: 20 }}>{description}</p>
+
+        <div style={{ display: "grid", gap: 12 }}>
+          <Row label="Funding target" value={`$${item.targetUSD.toLocaleString()}`} />
+          <Row label="Token symbol" value={tokenSymbol} />
+          <Row label="Network" value="Ethereum Sepolia" />
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="label">Tokenizer email</div>
+        <input
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "10px 12px",
+            fontSize: 15,
+            border: "1px solid var(--line)",
+            borderRadius: 6,
+            marginBottom: 20,
+          }}
+        />
+
+        {step === "idle" && (
+          <button className="btn btn-brass" onClick={tokenize}>
+            Tokenize with Brickken
+          </button>
+        )}
+
+        {step !== "idle" && (
+          <div>
+            <StatusLine label="Prepared and signed" done={step !== "preparing"} active={step === "preparing"} />
+            <StatusLine label="Sent to Brickken" done={step === "confirmed"} active={step === "sent"} />
+            <StatusLine label="Confirmed on chain" done={step === "confirmed"} active={false} />
+
+            {step === "confirmed" && (
+              <p className="mono" style={{ marginTop: 16, fontSize: 13 }}>
+                Asset tokenized. Token: {tokenSymbol}. Chain: Sepolia.
+                {txHash ? ` Transaction: ${txHash}` : ""}
+              </p>
+            )}
+
+            {error && <p style={{ marginTop: 16, color: "#a13f3f" }}>{error}</p>}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between" }}>
+      <span style={{ color: "#8a8270" }}>{label}</span>
+      <span className="mono" style={{ fontWeight: 600 }}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function StatusLine({ label, done, active }: { label: string; done: boolean; active: boolean }) {
+  return (
+    <div className="status-line">
+      <span className={`dot ${done ? "done" : active ? "active" : ""}`} />
+      {label}
+    </div>
+  );
+}
