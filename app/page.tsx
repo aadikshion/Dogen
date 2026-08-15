@@ -1,10 +1,10 @@
 import Link from "next/link";
 
 const STEPS = [
-  { n: "01", title: "Meet your dog", body: "Upload a photo. Google AI builds a simple care profile." },
-  { n: "02", title: "See the economy", body: "See what feeding, vet care, grooming, and training actually cost." },
-  { n: "03", title: "Back something", body: "Fund your dog's care directly, or back a dog business nearby." },
-  { n: "04", title: "Tokenize it", body: "Brickken turns the pick into a sandbox token on Sepolia." },
+  { n: "01", title: "Meet your dog", body: "Upload a photo, AI builds a care profile." },
+  { n: "02", title: "See the economy", body: "See feeding, vet, grooming, training costs." },
+  { n: "03", title: "Back something", body: "Fund your dog, or back a business nearby." },
+  { n: "04", title: "Tokenize it", body: "Brickken turns the pick into a sandbox token." },
 ];
 
 export default function Home() {
@@ -28,8 +28,8 @@ export default function Home() {
 
       <div className="page">
         <div className="grid">
-          {STEPS.map((step) => (
-            <div key={step.n} className="card">
+          {STEPS.map((step, i) => (
+            <div key={step.n} className="card step-card" style={{ animationDelay: `${i * 0.12}s` }}>
               <div className="mono" style={{ color: "var(--brass-dim)", fontSize: 13, marginBottom: 6 }}>
                 {step.n}
               </div>

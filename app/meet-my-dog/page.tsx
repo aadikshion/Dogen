@@ -21,7 +21,6 @@ function fileToBase64(file: File): Promise<{ base64: string; mimeType: string }>
 export default function MeetMyDog() {
   const [dogName, setDogName] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [profile, setProfile] = useState<DogProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -33,6 +32,7 @@ export default function MeetMyDog() {
       const parsed = JSON.parse(stored) as DogProfile;
       setProfile(parsed);
       setDogName(parsed.name);
+      setPreviewUrl(parsed.photoUrl ?? null);
     }
   }, []);
 
@@ -42,15 +42,17 @@ export default function MeetMyDog() {
     setProfile(null);
     setDogName("");
     setPreviewUrl(null);
+    window.dispatchEvent(new Event("dogen-profile-updated"));
   }
 
   async function handleFile(file: File) {
     setError(null);
-    setPreviewUrl(URL.createObjectURL(file));
-    setLoading(true);
     setAnalyzing(true);
     try {
       const { base64, mimeType } = await fileToBase64(file);
+      const dataUrl = `data:${mimeType};base64,${base64}`;
+      setPreviewUrl(dataUrl);
+
       const res = await fetch("/api/analyze-dog", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -58,13 +60,15 @@ export default function MeetMyDog() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Something went wrong reading the photo");
-      setProfile(data);
-      window.localStorage.setItem("dogen-profile", JSON.stringify(data));
+
+      const fullProfile = { ...data, photoUrl: dataUrl };
+      setProfile(fullProfile);
+      window.localStorage.setItem("dogen-profile", JSON.stringify(fullProfile));
       window.localStorage.removeItem("dogen-categories");
+      window.dispatchEvent(new Event("dogen-profile-updated"));
     } catch (err: any) {
       setError(err.message ?? "Something went wrong");
     } finally {
-      setLoading(false);
       setAnalyzing(false);
     }
   }
@@ -145,7 +149,7 @@ export default function MeetMyDog() {
         <div style={{ marginTop: 24 }}>
           <DogProfileCard profile={profile} />
 
-          <div style={{ marginTop: 16, display: "flex", gap: 12, flexWrap: "wrap" }}>
+          <div style={{ marginTop: 16, display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
             <button className="audio-btn" onClick={hearDog} disabled={audioLoading}>
               {audioLoading ? "Loading..." : `Hear ${profile.name} speak`}
             </button>
