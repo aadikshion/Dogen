@@ -68,9 +68,9 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
     for (let attempt = 0; attempt < 20; attempt++) {
       const res = await fetch(`/api/brickken/status?txId=${id}`);
       const data = await res.json();
-      if (data.status && data.status !== "pending") {
+      if (data.status && data.status === "success" || data.status === "failed") {
         setStep("confirmed");
-        setTxHash(data.txHash ?? null);
+        setTxHash(data.transactionHash ?? null);
         return;
       }
       await new Promise((r) => setTimeout(r, 4000));
@@ -165,7 +165,7 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
                     Token: {tokenSymbol}
                   </p>
                   {txHash ? (
-                    
+                    <a
                       href={`https://sepolia.etherscan.io/tx/${txHash}`}
                       target="_blank"
                       rel="noopener noreferrer"

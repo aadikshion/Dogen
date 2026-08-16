@@ -18,7 +18,7 @@ no markdown, no extra text. Use this exact shape:
 {"breed":"...","size":"Small|Medium|Large","energy":"Low|Medium|High","careNeeds":"one short sentence"}`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
