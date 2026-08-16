@@ -1,5 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
 
+const MODELS = ["gemini-3.5-flash", "gemini-flash-latest", "gemini-3.7-flash", "gemini-2.5-flash-lite"];
+
+async function tryModel(model: string, apiKey: string, prompt: string, mimeType: string, imageBase64: string) {
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              { text: prompt },
+              { inline_data: { mime_type: mimeType, data: imageBase64 } },
+            ],
+          },
+        ],
+      }),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data?.error?.message ?? `${model} failed with ${response.status}`);
+  }
+
+  const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!raw) {
+    throw new Error(`${model} returned no usable content`);
+  }
+
+  return raw;
+}
+
 export async function POST(req: NextRequest) {
   const apiKey = process.env.GOOGLE_AI_API_KEY;
   if (!apiKey) {
@@ -17,33 +52,21 @@ export async function POST(req: NextRequest) {
 no markdown, no extra text. Use this exact shape:
 {"breed":"...","size":"Small|Medium|Large","energy":"Low|Medium|High","careNeeds":"one short sentence"}`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                { text: prompt },
-                { inline_data: { mime_type: mimeType ?? "image/jpeg", data: imageBase64 } },
-              ],
-            },
-          ],
-        }),
+    let raw: string | null = null;
+    let lastError = "";
+
+    for (const model of MODELS) {
+      try {
+        raw = await tryModel(model, apiKey, prompt, mimeType ?? "image/jpeg", imageBase64);
+        break;
+      } catch (err: any) {
+        lastError = err.message ?? String(err);
+        continue;
       }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data?.error?.message ?? `Google AI request failed with ${response.status}`);
     }
 
-    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!raw) {
-      throw new Error("Google AI did not return a usable response");
+      throw new Error(`All models failed. Last error: ${lastError}`);
     }
 
     const cleaned = raw.replace(/```json|```/g, "").trim();
