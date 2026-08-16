@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { BUSINESSES } from "@/lib/data";
+import { BUSINESSES, DIRECT_PREFIX } from "@/lib/data";
+import { generateTokenSymbol } from "@/lib/symbol";
 import { AssetListItem, FundingCategory } from "@/lib/types";
 
 type Step = "idle" | "preparing" | "sent" | "confirmed" | "failed";
@@ -13,6 +14,7 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
   const kind = searchParams.get("kind") === "business" ? "business" : "direct";
 
   const [item, setItem] = useState<AssetListItem | null>(null);
+  const [tokenSymbol, setTokenSymbol] = useState<string>("");
   const [email, setEmail] = useState("owner@example.com");
   const [step, setStep] = useState<Step>("idle");
   const [txHash, setTxHash] = useState<string | null>(null);
@@ -23,23 +25,24 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
     if (kind === "business") {
       const found = BUSINESSES.find((b) => b.id === params.id) ?? null;
       setItem(found);
+      if (found) setTokenSymbol(generateTokenSymbol(found.symbolPrefix));
     } else {
       const stored = window.localStorage.getItem("dogen-categories");
       if (stored) {
         const categories = JSON.parse(stored) as FundingCategory[];
-        setItem(categories.find((c) => c.id === params.id) ?? null);
+        const found = categories.find((c) => c.id === params.id) ?? null;
+        setItem(found);
+        if (found) setTokenSymbol(generateTokenSymbol(DIRECT_PREFIX[found.id] ?? "D"));
       }
     }
   }, [kind, params.id]);
 
   async function tokenize() {
-    if (!item) return;
+    if (!item || !tokenSymbol) return;
     setError(null);
     setStep("preparing");
 
     const assetName = item.kind === "direct" ? item.title : item.name;
-    const tokenSymbol =
-      item.kind === "business" ? item.tokenSymbol : (item.id === 'feeding' ? 'F' : item.id === 'vet' ? 'V' : item.id === 'grooming' ? 'G' : 'T') + Date.now().toString().slice(-4);
 
     try {
       const res = await fetch("/api/brickken/prepare", {
@@ -68,7 +71,7 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
     for (let attempt = 0; attempt < 20; attempt++) {
       const res = await fetch(`/api/brickken/status?txId=${id}`);
       const data = await res.json();
-      if (data.status && data.status === "success" || data.status === "failed") {
+      if (data.status === "success" || data.status === "failed") {
         setStep("confirmed");
         setTxHash(data.transactionHash ?? null);
         return;
@@ -88,18 +91,17 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
 
   const title = item.kind === "direct" ? item.title : item.name;
   const description = item.kind === "direct" ? item.description : item.pitch;
-  const tokenSymbol = item.kind === "business" ? item.tokenSymbol : (item.id === 'feeding' ? 'F' : item.id === 'vet' ? 'V' : item.id === 'grooming' ? 'G' : 'T') + Date.now().toString().slice(-4);
   const buttonLabel =
     item.kind === "direct" ? "Record this on Brickken" : "Tokenize with Brickken";
   const explainer =
     item.kind === "direct"
-      ? "This creates a token that stands for who backed this category. It is a transparent record, not a claim of ownership."
-      : "This creates a token representing a real world asset, tracked and moved through Brickken's sandbox.";
+      ? "This creates a token that stands for who backed this category. Every dog gets its own token, never shared with another dog's contribution."
+      : "This creates a token for your own contribution to this business. Every backer gets their own token, so different dogs and different visitors never share a symbol.";
 
   return (
     <div className="page">
       <Link href="/dog-economy" style={{ fontSize: 14, color: "#8a8270", textDecoration: "none" }}>
-        ← Back to the dog economy
+        Back to the dog economy
       </Link>
       <div className="label" style={{ marginTop: 16 }}>
         Step three
@@ -111,7 +113,7 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
 
         <div style={{ display: "grid", gap: 12 }}>
           <Row label="Funding target" value={`$${item.targetUSD.toLocaleString()}`} />
-          <Row label="Token symbol" value={tokenSymbol} />
+          <Row label="Token symbol" value={tokenSymbol || "generating..."} />
           <Row label="Network" value="Ethereum Sepolia" />
           {item.kind === "business" && <Row label="What the funding buys" value={item.purpose} />}
           {item.kind === "business" && <Row label="How backing works" value={item.structure} />}
@@ -165,14 +167,14 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
                     Token: {tokenSymbol}
                   </p>
                   {txHash ? (
-                    <a
+                    
                       href={`https://sepolia.etherscan.io/tx/${txHash}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="mono"
                       style={{ fontSize: 13, color: "#2f5e33", wordBreak: "break-all" }}
                     >
-                      View this transaction on Sepolia Etherscan →
+                      View this transaction on Sepolia Etherscan
                     </a>
                   ) : (
                     <p style={{ fontSize: 13, color: "#5c574a" }}>

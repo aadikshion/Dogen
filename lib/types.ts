@@ -24,7 +24,7 @@ export type Business = {
   purpose: string;
   structure: string;
   targetUSD: number;
-  tokenSymbol: string;
+  symbolPrefix: string;
 };
 
 export type AssetListItem = FundingCategory | Business;

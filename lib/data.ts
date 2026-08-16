@@ -12,6 +12,13 @@ const ENERGY_MULTIPLIER: Record<DogProfile["energy"], number> = {
   High: 1.5,
 };
 
+export const DIRECT_PREFIX: Record<string, string> = {
+  feeding: "F",
+  vet: "V",
+  grooming: "G",
+  training: "T",
+};
+
 export function buildFundingCategories(profile: DogProfile): FundingCategory[] {
   const sizeMult = SIZE_MULTIPLIER[profile.size];
   const energyMult = ENERGY_MULTIPLIER[profile.energy];
@@ -60,9 +67,9 @@ export const BUSINESSES: Business[] = [
     category: "Grooming",
     pitch: "A mobile grooming van bringing wash day to your driveway.",
     purpose: "Buys the van and the grooming equipment inside it.",
-    structure: "Backers are recorded as early supporters of the expansion.",
+    structure: "Each backer's contribution is recorded as its own token.",
     targetUSD: 20000,
-    tokenSymbol: "PWASH",
+    symbolPrefix: "W",
   },
   {
     id: "happytails",
@@ -71,9 +78,9 @@ export const BUSINESSES: Business[] = [
     category: "Daycare & Spa",
     pitch: "A resort style daycare and spa adding a second play yard.",
     purpose: "Funds construction of the new yard and spa equipment.",
-    structure: "Backers are recorded as early supporters of the expansion.",
+    structure: "Each backer's contribution is recorded as its own token.",
     targetUSD: 35000,
-    tokenSymbol: "HTAIL",
+    symbolPrefix: "P",
   },
   {
     id: "pawvan",
@@ -82,8 +89,8 @@ export const BUSINESSES: Business[] = [
     category: "Training",
     pitch: "A mobile training van bringing structured sessions to your street.",
     purpose: "Buys the van and training equipment for mobile sessions.",
-    structure: "Backers are recorded as early supporters of the expansion.",
+    structure: "Each backer's contribution is recorded as its own token.",
     targetUSD: 25000,
-    tokenSymbol: "PWVAN",
+    symbolPrefix: "B",
   },
 ];
