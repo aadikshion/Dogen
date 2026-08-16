@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Body: { imageBase64, mimeType, dogName }
-// Sends the photo to Google AI and asks for a short, structured profile.
 export async function POST(req: NextRequest) {
   const apiKey = process.env.GOOGLE_AI_API_KEY;
   if (!apiKey) {
@@ -20,7 +18,7 @@ no markdown, no extra text. Use this exact shape:
 {"breed":"...","size":"Small|Medium|Large","energy":"Low|Medium|High","careNeeds":"one short sentence"}`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -38,7 +36,16 @@ no markdown, no extra text. Use this exact shape:
     );
 
     const data = await response.json();
-    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
+
+    if (!response.ok) {
+      throw new Error(data?.error?.message ?? `Google AI request failed with ${response.status}`);
+    }
+
+    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!raw) {
+      throw new Error("Google AI did not return a usable response");
+    }
+
     const cleaned = raw.replace(/```json|```/g, "").trim();
     const parsed = JSON.parse(cleaned);
 

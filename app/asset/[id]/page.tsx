@@ -16,6 +16,7 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
   const [email, setEmail] = useState("owner@example.com");
   const [step, setStep] = useState<Step>("idle");
   const [txHash, setTxHash] = useState<string | null>(null);
+  const [txId, setTxId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -54,6 +55,7 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Tokenization failed");
 
+      setTxId(data.txId);
       setStep("sent");
       await pollStatus(data.txId);
     } catch (err: any) {
@@ -62,9 +64,9 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
     }
   }
 
-  async function pollStatus(txId: string) {
+  async function pollStatus(id: string) {
     for (let attempt = 0; attempt < 20; attempt++) {
-      const res = await fetch(`/api/brickken/status?txId=${txId}`);
+      const res = await fetch(`/api/brickken/status?txId=${id}`);
       const data = await res.json();
       if (data.status && data.status !== "pending") {
         setStep("confirmed");
@@ -73,7 +75,7 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
       }
       await new Promise((r) => setTimeout(r, 4000));
     }
-    setError("Still pending after a while, check the status manually with this txId: " + txId);
+    setError("Still pending after a while, check the status manually with this txId: " + id);
   }
 
   if (!item) {
@@ -111,6 +113,8 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
           <Row label="Funding target" value={`$${item.targetUSD.toLocaleString()}`} />
           <Row label="Token symbol" value={tokenSymbol} />
           <Row label="Network" value="Ethereum Sepolia" />
+          {item.kind === "business" && <Row label="What the funding buys" value={item.purpose} />}
+          {item.kind === "business" && <Row label="How backing works" value={item.structure} />}
         </div>
       </div>
 
@@ -145,21 +149,40 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
             <StatusLine label="Confirmed on chain" done={step === "confirmed"} active={false} />
 
             {step === "confirmed" && (
-              <>
-                <p className="mono" style={{ marginTop: 16, fontSize: 13 }}>
-                  Asset tokenized. Token: {tokenSymbol}. Chain: Sepolia.
-                  {txHash ? ` Transaction: ${txHash}` : ""}
-                </p>
-                <div style={{ marginTop: 24, borderTop: "1px solid var(--line)", paddingTop: 20 }}>
-                  <div className="label">What happens next</div>
-                  <ul style={{ margin: 0, paddingLeft: 20, fontSize: 14, color: "#5c574a", lineHeight: 1.9 }}>
-                    <li>Backers who want to hold this token get whitelisted</li>
-                    <li>A funding round opens with a start and end date</li>
-                    <li>Investors put money in and claim their token</li>
-                    <li>The round closes and funds move to what was raised for</li>
-                  </ul>
+              <div style={{ marginTop: 16 }}>
+                <div
+                  style={{
+                    background: "#f1f7f2",
+                    border: "1px solid #b9d6bd",
+                    borderRadius: 8,
+                    padding: 16,
+                  }}
+                >
+                  <div className="label" style={{ color: "#4b7a4f" }}>
+                    Confirmed on Sepolia
+                  </div>
+                  <p className="mono" style={{ fontSize: 13, marginTop: 8, marginBottom: 4 }}>
+                    Token: {tokenSymbol}
+                  </p>
+                  {txHash ? (
+                    
+                      href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mono"
+                      style={{ fontSize: 13, color: "#2f5e33", wordBreak: "break-all" }}
+                    >
+                      View this transaction on Sepolia Etherscan →
+                    </a>
+                  ) : (
+                    <p style={{ fontSize: 13, color: "#5c574a" }}>
+                      Transaction hash not returned by the status check yet. txId: {txId}. Check
+                      it directly against Brickken's get-transaction-status if it does not appear
+                      here shortly.
+                    </p>
+                  )}
                 </div>
-              </>
+              </div>
             )}
 
             {error && <p style={{ marginTop: 16, color: "#a13f3f" }}>{error}</p>}
