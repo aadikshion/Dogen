@@ -26,6 +26,29 @@ Either path ends the same way. The pick gets tokenized through Brickken, on
 their sandbox, on Sepolia. After a profile is created, the dog can also
 speak a short line about it, generated with ElevenLabs.
 
+## Proof it actually works
+
+Network: Ethereum Sepolia, chainId aa36a7 (11155111 decimal).
+
+Real transactions produced by this build, verifiable on Sepolia Etherscan:
+
+- FEEDI, Feeding
+  https://sepolia.etherscan.io/tx/0x60ca39cdda253234007332d1ed02716ef35822118d003e6c83f56d23ab12f6f1
+- VET, Vet and health
+  https://sepolia.etherscan.io/tx/0xb0d3bd5aad94dec370fe0315560e443f0660b3abfda3a70809da5708c4f48511
+- GROOM, Grooming
+  https://sepolia.etherscan.io/tx/0xa8f019e7904e78e40985064bfb45232115621a5794174ddf1ebcc2c5b90e713e
+- TRAIN, Training
+  https://sepolia.etherscan.io/tx/0x08d4cee4e74323de6455cf5e1d67e66fedf9a29cdf20aadc3019415d44569a0c
+- PWASH, The Daily Wag
+  https://sepolia.etherscan.io/tx/0xa334c2c068d0997efc0da246e0602a178a0b7e5276ccbf94a8683cfe52a3efa9
+- PWVAN, Bark Bound Enterprises
+  https://sepolia.etherscan.io/tx/0x6530e77982ca139f9e5db66f1997d1112c717ede732d10106d78d65f6fcec211
+- HTAIL, Paws & Palms
+  https://sepolia.etherscan.io/tx/0xc1ba86293fb25508272d03d857e1e3347c1ed6508972ae45deb689659d3a978f
+
+Signer / reward wallet: 0xa38F413E38cF78fed5f0e112dE5f65512860EcF3
+
 ## Brickken integration
 
 Surface used: REST, calling Brickken's sandbox API directly from Next.js
