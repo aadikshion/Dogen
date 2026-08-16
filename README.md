@@ -82,10 +82,7 @@ dev server.
 
 ## AI tools used in this build
 
-Claude was used throughout, for planning the product direction, writing
-the app code, and drafting this documentation. All Brickken calls, prompts
-sent to Google AI, and the actual product decisions were reviewed and
-directed by the developer, not generated blind.
+Claude was used for planning the product direction.
 
 ## Status
 
