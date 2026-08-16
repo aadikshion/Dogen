@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const MODELS = ["gemini-3.5-flash", "gemini-flash-latest", "gemini-3.7-flash", "gemini-2.5-flash-lite"];
+const MODELS = ["gemini-3.5-flash", "gemini-3.6-flash", "gemini-3.7-flash", "gemini-3.1-flash"];
 
 async function tryModel(model: string, apiKey: string, prompt: string, mimeType: string, imageBase64: string) {
   const response = await fetch(
@@ -53,20 +53,20 @@ no markdown, no extra text. Use this exact shape:
 {"breed":"...","size":"Small|Medium|Large","energy":"Low|Medium|High","careNeeds":"one short sentence"}`;
 
     let raw: string | null = null;
-    let lastError = "";
+    const attempts: string[] = [];
 
     for (const model of MODELS) {
       try {
         raw = await tryModel(model, apiKey, prompt, mimeType ?? "image/jpeg", imageBase64);
         break;
       } catch (err: any) {
-        lastError = err.message ?? String(err);
+        attempts.push(`${model}: ${err.message ?? String(err)}`);
         continue;
       }
     }
 
     if (!raw) {
-      throw new Error(`All models failed. Last error: ${lastError}`);
+      throw new Error(`All models failed.\n${attempts.join("\n")}`);
     }
 
     const cleaned = raw.replace(/```json|```/g, "").trim();
