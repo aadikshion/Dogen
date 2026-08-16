@@ -167,7 +167,7 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
                     Token: {tokenSymbol}
                   </p>
                   {txHash ? (
-                    
+                    <a
                       href={`https://sepolia.etherscan.io/tx/${txHash}`}
                       target="_blank"
                       rel="noopener noreferrer"
