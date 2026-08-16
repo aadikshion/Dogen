@@ -26,20 +26,6 @@ Either path ends the same way. The pick gets tokenized through Brickken, on
 their sandbox, on Sepolia. After a profile is created, the dog can also
 speak a short line about it, generated with ElevenLabs.
 
-## Proof it actually works
-
-Network: Ethereum Sepolia, chainId aa36a7 (11155111 decimal).
-
-Real transactions produced by this build, verifiable on Sepolia Etherscan:
-
-- PWASH, Ronke's Mobile Grooming (now The Daily Wag)
-- PWVAN, Bark Bound Enterprises
-  https://sepolia.etherscan.io/tx/0x13c1df3d2f3238240a512df673ba2c2663c6250831e0e03738ce687379c45d31
-- HTAIL, Paws & Palms
-  https://sepolia.etherscan.io/tx/0xc1ba86293fb25508272d03d857e1e3347c1ed6508972ae45deb689659d3a978f
-
-Signer / reward wallet: 0xa38F413E38cF78fed5f0e112dE5f65512860EcF3
-
 ## Brickken integration
 
 Surface used: REST, calling Brickken's sandbox API directly from Next.js
