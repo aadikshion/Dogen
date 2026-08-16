@@ -2,110 +2,51 @@
 
 See the economy behind your dog.
 
-Dogen is built for two challenges at once. The DEV Weekend Challenge, Dog
-Days Edition, and Build with Brickken. Both share one deadline pressure and
-one build.
+Dogen turns a simple photo of a dog into a view of the costs, services, businesses, and funding opportunities that exist around it.
 
 ## What it does
 
-Upload a photo of your dog. Google AI reads it and writes a short profile,
-breed, size, energy level, and care needs. From that profile, Dogen works
-out what a year of owning that dog actually costs, feeding, vet care,
-grooming, and training.
+Upload a photo of your dog.
 
-From there you can do one of two things.
+Google AI reads the photo and creates a profile with the dog's breed, size, energy level, and care needs. Dogen uses that profile to estimate what a year of owning the dog could cost across feeding, vet care, grooming, and training.
 
-Fund your dog directly. People who already know your dog, family, friends,
-co-owners, can put sandbox money toward a specific cost category.
+From there, you can take two paths.
 
-Invest in your dog's world. A small list of real dog businesses, a mobile
-grooming van, a daycare and spa, a mobile training service, sit alongside
-the direct funding option. Anyone can back one, no dog required.
+### Fund your dog directly
 
-Either path ends the same way. The pick gets tokenized through Brickken, on
-their sandbox, on Sepolia. After a profile is created, the dog can also
-speak a short line about it, generated with ElevenLabs.
+Put sandbox money toward a specific part of your dog's care. Feeding, vet and health, grooming, or training.
 
-## Proof it actually works
+This can be useful for people who already know the dog, including family, friends, and co-owners.
 
-Network: Ethereum Sepolia, chainId aa36a7 (11155111 decimal).
+### Invest in your dog's world
 
-Real transactions produced by this build, verifiable on Sepolia Etherscan:
+Dogs create demand for an entire ecosystem of businesses.
 
-- FEEDI, Feeding
-  https://sepolia.etherscan.io/tx/0x60ca39cdda253234007332d1ed02716ef35822118d003e6c83f56d23ab12f6f1
-- VET, Vet and health
-  https://sepolia.etherscan.io/tx/0xb0d3bd5aad94dec370fe0315560e443f0660b3abfda3a70809da5708c4f48511
-- GROOM, Grooming
-  https://sepolia.etherscan.io/tx/0xa8f019e7904e78e40985064bfb45232115621a5794174ddf1ebcc2c5b90e713e
-- TRAIN, Training
-  https://sepolia.etherscan.io/tx/0x08d4cee4e74323de6455cf5e1d67e66fedf9a29cdf20aadc3019415d44569a0c
-- PWASH, The Daily Wag
-  https://sepolia.etherscan.io/tx/0xa334c2c068d0997efc0da246e0602a178a0b7e5276ccbf94a8683cfe52a3efa9
-- PWVAN, Bark Bound Enterprises
-  https://sepolia.etherscan.io/tx/0x6530e77982ca139f9e5db66f1997d1112c717ede732d10106d78d65f6fcec211
-- HTAIL, Paws & Palms
-  https://sepolia.etherscan.io/tx/0xc1ba86293fb25508272d03d857e1e3347c1ed6508972ae45deb689659d3a978f
+Dogen lets you explore opportunities such as mobile grooming, daycare, and training services, then back a business with sandbox funds.
 
-Signer / reward wallet: 0xa38F413E38cF78fed5f0e112dE5f65512860EcF3
+You do not need to own a dog to take part.
 
-## Brickken integration
+### Then take it on-chain
 
-Surface used: REST, calling Brickken's sandbox API directly from Next.js
-API routes.
+Once an opportunity is selected, Dogen can tokenize it through Brickken's sandbox on Ethereum Sepolia.
 
-Methods called so far: newTokenization. The prepare, sign, and send loop
-lives in lib/brickken.ts and runs for real against the sandbox, no
-mocked responses. Status is confirmed by polling get-transaction-status.
+Each tokenization goes through the actual prepare, sign, and send flow, with the resulting transaction available to verify on-chain.
 
-Methods planned before the campaign deadline: whitelist, newSto, newInvest,
-claimTokens, closeOffer, dividendDistribution. Each one follows the same
-shape already written for newTokenization.
+After a dog profile is created, ElevenLabs can also turn a short line based on that profile into audio, giving the dog a voice.
 
-## Google AI and ElevenLabs
+## Proof it works
 
-Google AI (model: gemini-3.5-flash) reads the uploaded photo and returns a
-structured profile, used to build the cost estimate shown on the Dog
-Economy page.
+Dogen runs on Ethereum Sepolia.
 
-ElevenLabs turns a short line of text into audio, giving the dog a voice
-after its profile is created.
+**Chain ID:** `11155111`  
+**Network:** Ethereum Sepolia
 
-## Stack
-
-Next.js.
-
-## Running it
-
-See SETUP.md for exact steps, installing, adding keys, and starting the
-dev server.
-
-## AI tools used in this build
-
-Claude was used throughout, for planning the product direction, writing
-the app code, and drafting this documentation. All Brickken calls, prompts
-sent to Google AI, and the actual product decisions were reviewed and
-directed by the developer, not generated blind.
-
-## Status
-
-The core loop works end to end: upload a dog, get an AI profile, hear it
-speak, browse the dog economy, tokenize an asset for real on Brickken's
-sandbox, and verify the result on a public block explorer. The rest of the
-Brickken lifecycle, whitelisting, opening a funding round, taking real
-investment, is written into the plan but not yet wired into the app.
-
-## Proof it actually works
-
-Network: Ethereum Sepolia  
-Chain ID: `aa36a7` (`11155111` decimal)
-
-These are real transactions produced by Dogen through Brickken's sandbox. Each transaction can be independently verified on Sepolia Etherscan.
+The transactions below were produced by the application and can be verified publicly on Sepolia Etherscan.
 
 - **FEEDI, Feeding**  
   https://sepolia.etherscan.io/tx/0x60ca39cdda253234007332d1ed02716ef35822118d003e6c83f56d23ab12f6f1
 
-- **VET, Vet and Health**  
+- **VET, Vet and health**  
   https://sepolia.etherscan.io/tx/0xb0d3bd5aad94dec370fe0315560e443f0660b3abfda3a70809da5708c4f48511
 
 - **GROOM, Grooming**  
@@ -123,4 +64,71 @@ These are real transactions produced by Dogen through Brickken's sandbox. Each t
 - **HTAIL, Paws & Palms**  
   https://sepolia.etherscan.io/tx/0xc1ba86293fb25508272d03d857e1e3347c1ed6508972ae45deb689659d3a978f
 
-Signer / reward wallet: `0xa38F413E38cF78fed5f0e112dE5f65512860EcF3`
+**Signer / reward wallet:**  
+`0xa38F413E38cF78fed5f0e112dE5f65512860EcF3`
+
+## Brickken integration
+
+Dogen connects directly to Brickken's sandbox API through Next.js API routes.
+
+The current tokenization flow uses `newTokenization` and runs the full prepare, sign, and send lifecycle against the sandbox.
+
+Transactions are signed locally with the whitelisted wallet, sent for broadcast, and then checked until the transaction is confirmed.
+
+The integration is structured to support the wider Brickken tokenization lifecycle as the project continues to expand.
+
+## Google AI and ElevenLabs
+
+### Google AI
+
+Google AI analyzes the uploaded dog photo and returns a structured profile containing:
+
+- Breed
+- Size
+- Energy level
+- Care needs
+
+That profile drives the yearly cost estimate shown throughout the Dog Economy.
+
+### ElevenLabs
+
+ElevenLabs turns a short line generated from the dog's profile into audio.
+
+Once the profile exists, the dog can speak.
+
+## Stack
+
+- Next.js
+- Google AI
+- ElevenLabs
+- Brickken REST API
+- Ethereum Sepolia
+
+## Running it
+
+See `SETUP.md` for the exact setup instructions, including installing dependencies, adding the required environment variables, and starting the development server.
+
+## AI tools used in this build
+
+Claude and Chatgpt were used during planning and product development.
+
+## Milestones
+
+### Completed
+
+- Dog photo upload
+- AI generated dog profile
+- Breed, size, energy, and care analysis
+- Personalized yearly cost estimate
+- Direct dog care funding
+- Dog business investment opportunities
+- ElevenLabs voice generation
+- Brickken sandbox tokenization
+- Real Sepolia transactions
+- Public transaction verification
+
+### Next
+
+The next stage is expanding the Brickken integration beyond token creation to support the wider funding lifecycle, including whitelisting, opening investment offers, accepting investments, claiming tokens, closing offers, and dividend distribution.
+
+The foundation for that expansion is already in place.
