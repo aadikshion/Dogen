@@ -39,7 +39,7 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
 
     const assetName = item.kind === "direct" ? item.title : item.name;
     const tokenSymbol =
-      item.kind === "business" ? item.tokenSymbol : item.id.slice(0, 5).toUpperCase();
+      item.kind === "business" ? item.tokenSymbol : (item.id === 'feeding' ? 'F' : item.id === 'vet' ? 'V' : item.id === 'grooming' ? 'G' : 'T') + Date.now().toString().slice(-4);
 
     try {
       const res = await fetch("/api/brickken/prepare", {
@@ -88,7 +88,7 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
 
   const title = item.kind === "direct" ? item.title : item.name;
   const description = item.kind === "direct" ? item.description : item.pitch;
-  const tokenSymbol = item.kind === "business" ? item.tokenSymbol : item.id.slice(0, 5).toUpperCase();
+  const tokenSymbol = item.kind === "business" ? item.tokenSymbol : (item.id === 'feeding' ? 'F' : item.id === 'vet' ? 'V' : item.id === 'grooming' ? 'G' : 'T') + Date.now().toString().slice(-4);
   const buttonLabel =
     item.kind === "direct" ? "Record this on Brickken" : "Tokenize with Brickken";
   const explainer =
