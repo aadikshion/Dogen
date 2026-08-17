@@ -40,6 +40,7 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
   async function tokenize() {
     if (!item || !tokenSymbol) return;
     setError(null);
+    setTxHash(null);
     setStep("preparing");
 
     const assetName = item.kind === "direct" ? item.title : item.name;
@@ -71,11 +72,22 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
     for (let attempt = 0; attempt < 20; attempt++) {
       const res = await fetch(`/api/brickken/status?txId=${id}`);
       const data = await res.json();
-      if (data.status === "success" || data.status === "failed") {
+
+      if (data.status === "success") {
         setStep("confirmed");
         setTxHash(data.transactionHash ?? null);
         return;
       }
+
+      if (data.status === "failed") {
+        setStep("failed");
+        setTxHash(data.transactionHash ?? null);
+        setError(
+          "This transaction reached Brickken and Sepolia but did not succeed. No token exists for this attempt, so the funding lifecycle will not work for it."
+        );
+        return;
+      }
+
       await new Promise((r) => setTimeout(r, 4000));
     }
     setError("Still pending after a while, check the status manually with this txId: " + id);
@@ -147,7 +159,11 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
         {step !== "idle" && (
           <div>
             <StatusLine label="Prepared and signed" done={step !== "preparing"} active={step === "preparing"} />
-            <StatusLine label="Sent to Brickken" done={step === "confirmed"} active={step === "sent"} />
+            <StatusLine
+              label="Sent to Brickken"
+              done={step === "confirmed" || step === "failed"}
+              active={step === "sent"}
+            />
             <StatusLine label="Confirmed on chain" done={step === "confirmed"} active={false} />
 
             {step === "confirmed" && (
@@ -198,7 +214,40 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
               </div>
             )}
 
-            {error && <p style={{ marginTop: 16, color: "#a13f3f" }}>{error}</p>}
+            {step === "failed" && (
+              <div style={{ marginTop: 16 }}>
+                <div
+                  style={{
+                    background: "#fbebeb",
+                    border: "1px solid #e3b3b3",
+                    borderRadius: 8,
+                    padding: 16,
+                  }}
+                >
+                  <div className="label" style={{ color: "#a13f3f" }}>
+                    Failed
+                  </div>
+                  <p style={{ fontSize: 13, color: "#5c574a", marginTop: 8, marginBottom: 4 }}>
+                    {error || "This transaction did not succeed."}
+                  </p>
+                  {txHash && (
+                    <a
+                      href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mono"
+                      style={{ fontSize: 13, color: "#a13f3f", wordBreak: "break-all" }}
+                    >
+                      View this transaction on Sepolia Etherscan
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {error && step !== "failed" && (
+              <p style={{ marginTop: 16, color: "#a13f3f" }}>{error}</p>
+            )}
           </div>
         )}
       </div>
