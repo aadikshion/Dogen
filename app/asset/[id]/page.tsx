@@ -167,15 +167,26 @@ export default function AssetDetail({ params }: { params: { id: string } }) {
                     Token: {tokenSymbol}
                   </p>
                   {txHash ? (
-                    <a
-                      href={`https://sepolia.etherscan.io/tx/${txHash}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mono"
-                      style={{ fontSize: 13, color: "#2f5e33", wordBreak: "break-all" }}
-                    >
-                      View this transaction on Sepolia Etherscan
-                    </a>
+                    <>
+                      <a
+                        href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mono"
+                        style={{ fontSize: 13, color: "#2f5e33", wordBreak: "break-all" }}
+                      >
+                        View this transaction on Sepolia Etherscan
+                      </a>
+                      <div style={{ marginTop: 8 }}>
+                        <a
+                          href={`/manage/${tokenSymbol}?name=${encodeURIComponent(title)}&email=${encodeURIComponent(email)}`}
+                          className="mono"
+                          style={{ fontSize: 13, color: "#2f5e33" }}
+                        >
+                          Continue the funding lifecycle
+                        </a>
+                      </div>
+                    </>
                   ) : (
                     <p style={{ fontSize: 13, color: "#5c574a" }}>
                       Transaction hash not returned by the status check yet. txId: {txId}. Check
