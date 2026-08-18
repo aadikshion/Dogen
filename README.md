@@ -32,6 +32,8 @@ Once an opportunity is selected, Dogen can tokenize it through Brickken's sandbo
 
 Each tokenization goes through the actual prepare, sign, and send flow, with the resulting transaction available to verify on-chain.
 
+After a successful tokenization, you can continue into the full funding lifecycle for that token: whitelisting the investor, opening the funding round, investing, claiming the token, closing the offer, and distributing a return. Each step is a separate page you can walk through, and each one hits Brickken's sandbox for real.
+
 After a dog profile is created, ElevenLabs can also turn a short line based on that profile into audio, giving the dog a voice.
 
 ## Proof it works
@@ -71,11 +73,11 @@ The transactions below were produced by the application and can be verified publ
 
 Dogen connects directly to Brickken's sandbox API through Next.js API routes.
 
-The current tokenization flow uses `newTokenization` and runs the full prepare, sign, and send lifecycle against the sandbox.
+Tokenization uses `newTokenization` and runs the full prepare, sign, and send lifecycle against the sandbox. Transactions are signed locally with the whitelisted wallet, sent for broadcast, and then checked until the transaction is confirmed or the sandbox reports it failed.
 
-Transactions are signed locally with the whitelisted wallet, sent for broadcast, and then checked until the transaction is confirmed.
+Beyond tokenization, Dogen also calls `whitelist`, `newSto`, `newInvest`, `claimTokens`, `closeOffer`, and `dividendDistribution`. These live behind a page at `/manage/[symbol]`, reached from any successfully tokenized asset through a "Continue the funding lifecycle" link. Each button on that page fires a real call against the sandbox.
 
-The integration is structured to support the wider Brickken tokenization lifecycle as the project continues to expand.
+The investor steps on that page currently use the same wallet that tokenizes the asset, since this build has one funded wallet. That part of the flow is labeled as demo mode in the app itself. A second, separately funded wallet would turn it into a genuine two party flow between a tokenizer and an investor.
 
 ## Google AI and ElevenLabs
 
@@ -126,9 +128,9 @@ Claude and Chatgpt were used during planning and product development.
 - Brickken sandbox tokenization
 - Real Sepolia transactions
 - Public transaction verification
+- Full funding lifecycle routes: whitelist, open round, invest, claim, close, distribute
+- A page to walk through that lifecycle for any tokenized asset
 
 ### Next
 
-The next stage is expanding the Brickken integration beyond token creation to support the wider funding lifecycle, including whitelisting, opening investment offers, accepting investments, claiming tokens, closing offers, and dividend distribution.
-
-The foundation for that expansion is already in place.
+A second, separately funded wallet, so the funding lifecycle can be demonstrated as a genuine two party flow between a tokenizer and an investor, rather than one wallet playing both roles.
